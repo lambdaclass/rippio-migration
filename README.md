@@ -1,6 +1,6 @@
-
 ![Banner](.github/banner.jpg)
-[![codecov](https://codecov.io/gh/0xPolygon/polygon-edge/branch/develop/graph/badge.svg?token=PXEADRC1IW)](https://codecov.io/gh/0xPolygon/polygon-edge)
+[![codecov](https://codecov.io/gh/LaChain/polygon-edge/branch/develop/graph/badge.svg?token=PXEADRC1IW)](https://codecov.io/gh/LaChain/polygon-edge)
+
 ## Polygon Edge
 
 Polygon Edge is a modular and extensible framework for building Ethereum-compatible blockchain networks.
@@ -29,3 +29,14 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+## Release 🚀
+
+GoReleaser will use the latest Git tag of your repository.
+
+Create a tag and push it to GitHub:
+
+       git tag -a v0.1.0 -m "First release"
+       git push origin v0.1.0
+
+This will create a draft release with the corresponding changelog and assets.

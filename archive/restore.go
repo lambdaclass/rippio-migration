@@ -1,6 +1,7 @@
 package archive
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -292,7 +293,15 @@ func (b *blockStream) parseBlock(size uint64) (*types.Block, error) {
 	if err := block.UnmarshalRLP(data); err != nil {
 		return nil, err
 	}
-
+	if len(block.Transactions) > 0 {
+		file, _ := os.OpenFile("datos.json", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+		defer file.Close()
+		for _, transaction := range block.Transactions {
+			jsonData, _ := json.Marshal(transaction)
+			file.Write(jsonData)
+			file.WriteString("\n")
+		}
+	}
 	return block, nil
 }
 

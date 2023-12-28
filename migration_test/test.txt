@@ -1,0 +1,150 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/zksync-sdk/zksync2-go/clients"
+)
+
+var (
+	ZkSyncProvider   = "http://0.0.0.0:3050/"            // zkSync Era testnet
+	EthereumProvider = "https://rpc.ankr.com/eth_goerli" // goerli testnet
+)
+
+// type MyTransaction struct {
+//     *types.Transaction
+// }
+
+// func (tx *MyTransaction) WithSignature2() (types.Transaction) {
+// 	r := new(big.Int)
+// 	r.SetString("106287454196759066847211792031325706661401235312908304949829649037033979701705", 10)
+// 	s := new(big.Int)
+// 	s.SetString("7989732764615526430734405065785953595367951189355047462118874195239141735945", 10)
+// 	v := big.NewInt(int64(872))
+// 	chainId := big.NewInt(int64(418))
+
+// 	cpy := tx.inner.Copy()
+// 	cpy.SetSignatureValues(chainId, v, r, s)
+
+// 	return types.Transaction{inner: cpy, time: tx.time}
+// }
+
+func main() {
+	// Connect to zkSync network
+	client, err := clients.Dial(ZkSyncProvider)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer client.Close()
+
+	// Connect to Ethereum network
+	ethClient, err := ethclient.Dial(EthereumProvider)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer ethClient.Close()
+
+	blockNumber, err := client.BlockNumber(context.Background())
+	if err != nil {
+		log.Panic(err)
+	}
+	fmt.Println("Block number: ", blockNumber)
+
+	// txInfo, _, err := client.TransactionByHash(context.Background(), common.HexToHash("0x4b59eb6bf0f63efdd62db864737fe00539f1aa278c9e51c9f3df7923869b0622"))
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+
+	balances, err := client.BalanceAt(context.Background(), common.HexToAddress("0x020370692BE32284A6ba2ed4D68C18e8336b3F85"), nil)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(balances)
+
+	// {"Nonce":0,"GasPrice":1000,"Gas":21000,"To":"0x08f5f9a336Aae6A72c795Ddf307864B13d13F0Aa","Value":1000000000000000000,"Input":null,"V":872,"R":106287454196759066847211792031325706661401235312908304949829649037033979701705,"S":7989732764615526430734405065785953595367951189355047462118874195239141735945,"Hash":"0x0785cb804d5e6db08d336922d68785f66de28d918da907ba1710b4c066eef477","From":"0x0000000000000000000000000000000000000000"}
+
+	// address := new(common.Address)
+	// *address = common.HexToAddress("0x08f5f9a336Aae6A72c795Ddf307864B13d13F0Aa")
+
+	// r := new(big.Int)
+	// r.SetString("106287454196759066847211792031325706661401235312908304949829649037033979701705", 10)
+	// s := new(big.Int)
+	// s.SetString("7989732764615526430734405065785953595367951189355047462118874195239141735945", 10)
+
+	// transaction := types.NewTx(
+	// 	&types.DynamicFeeTx{
+	// 		ChainID:   big.NewInt(int64(270)),        // (*a.signer).Domain().ChainId,
+	// 		Nonce:     0,                             // preparedTx.Nonce.Uint64(),
+	// 		GasTipCap: big.NewInt(int64(0)),          // preparedTx.GasTipCap,
+	// 		GasFeeCap: big.NewInt(int64(1000000000)), // preparedTx.GasFeeCap,
+	// 		Gas:       21000,                         // preparedTx.Gas.Uint64(),
+	// 		To:        address,                       // preparedTx.To,
+	// 		Value:     big.NewInt(int64(100)),        // preparedTx.Value,
+	// 		V:         big.NewInt(int64(872)),
+	// 		R:         r,
+	// 		S:         s,
+	// 	})
+
+	// transactionWithSignature := transaction.WithSignature2()
+	// if err != nil {
+	// 	log.Println(err)
+	// }
+
+	// log.Println(transaction)
+
+	address := new(common.Address)
+	*address = common.HexToAddress("0x7e8f4a1D481895dC3Ec84E328df7f466BBC77D47")
+
+	r := new(big.Int)
+	r.SetString("4eacc8455e3af3a4017710b3f399f3e2548905707ec163f00d395fd389f65fe7", 16)
+	s := new(big.Int)
+	s.SetString("5f472d68e7fae25e18068c7f408cbfcfd94f1faacd8e448c2198fd26b717059d", 16)
+
+	log.Println(r)
+	log.Println(s)
+
+	transaction := types.NewTx(
+		&types.DynamicFeeTx{
+			ChainID:   big.NewInt(int64(270)),          // (*a.signer).Domain().ChainId,
+			Nonce:     0,                               // preparedTx.Nonce.Uint64(),
+			GasTipCap: big.NewInt(int64(0)),            // preparedTx.GasTipCap,
+			GasFeeCap: big.NewInt(int64(100000000000)), // preparedTx.GasFeeCap,
+			Gas:       21000,                           // preparedTx.Gas.Uint64(),
+			To:        address,                         // preparedTx.To,
+			Value:     big.NewInt(int64(5500)),         // preparedTx.Value,
+			V:         big.NewInt(int64(1)),
+			R:         r,
+			S:         s,
+		})
+
+	err = client.SendTransaction(context.Background(), transaction)
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+// 	// Create wallet
+// 	wallet, err := accounts.NewWallet(common.Hex2Bytes("fcf66ba6d3bd6aa30b2e06640e87e9fe46ab0722f5d83662e5035a58268a8a26"), &client, nil)
+// 	if err != nil {
+// 		log.Println(err)
+// 	}
+
+// 	// Perform transfer
+// 	tx, err := wallet.Transfer(nil, accounts.TransferTransaction{
+// 		To:     common.HexToAddress("0x08f5f9a336Aae6A72c795Ddf307864B13d13F0Aa"),
+// 		Amount: big.NewInt(1_000_000_000),
+// 		Token:  utils.EthAddress,
+// 	})
+// 	if err != nil {
+// 		log.Panic(err)
+// 	}
+// 	fmt.Println("Transaction: ", tx.Hash())
+// }
+
+// {"jsonrpc":"2.0","result":{"hash":"0xd9fac1df584d706d2296c14b5043f76eacd9036c05c755908158ae26e70b8e2a","nonce":"0x0","blockHash":"0xf9057c5f6359bb54a80b78eaf9b9e5f40c0ad676cc3debb5a4eed2d3785cedb3","blockNumber":"0xa","transactionIndex":"0x0","from":"0x52e511041b8fc5fffb30c250c7a3cec90114973e","to":"0x08f5f9a336aae6a72c795ddf307864b13d13f0aa","value":"0x3b9aca00","gasPrice":"0xee6b280","gas":"0x2a292","input":"0x","v":"0x1","r":"0x4eacc8455e3af3a4017710b3f399f3e2548905707ec163f00d395fd389f65fe7","s":"0x5f472d68e7fae25e18068c7f408cbfcfd94f1faacd8e448c2198fd26b717059d","type":"0x2","maxFeePerGas":"0xee6b280","maxPriorityFeePerGas":"0x5f5e100","chainId":"0x10e","l1BatchNumber":"0x5","l1BatchTxIndex":"0x0"},"id":1}%
